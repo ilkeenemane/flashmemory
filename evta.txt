@@ -1,0 +1,148 @@
+using System;
+
+abstract class Storage
+{
+    public string MediaName { get; set; }
+    public string Model { get; set; }
+
+    public abstract double GetStorageSize();
+    public abstract double Copy(double fileSize);
+    public abstract double FreeMemory();
+    public abstract void PrintDeviceInfo();
+}
+
+class Flash : Storage
+{
+    public double USB3Speed { get; set; }
+    public double Memory { get; set; }
+
+    public override double GetStorageSize()
+    {
+        return Memory;
+    }
+
+    public override double Copy(double fileSize)
+    {
+        int mediaCount = (int)Math.Ceiling(fileSize / Memory);
+        double copyTime = fileSize / USB3Speed;
+
+        Console.WriteLine($"Kopyalama üçün {mediaCount} flash sürücüsü və {copyTime} saat lazımdır.");
+        return copyTime;
+    }
+
+    public override double FreeMemory()
+    {
+        return Memory;
+    }
+
+    public override void PrintDeviceInfo()
+    {
+        Console.WriteLine($"Media: Flash, Model: {Model}, USB 3.0 Sürəti: {USB3Speed}, Yaddaş: {Memory} GB");
+    }
+}
+
+class DVD : Storage
+{
+    public double ReadWriteSpeed { get; set; }
+    public string Type { get; set; }
+
+    public override double GetStorageSize()
+    {
+        return (Type == "Single-sided") ? 4.7 : 9.0;
+    }
+
+    public override double Copy(double fileSize)
+    {
+        int mediaCount = (int)Math.Ceiling(fileSize / GetStorageSize());
+        double copyTime = fileSize / ReadWriteSpeed;
+
+        Console.WriteLine($"Kopyalama üçün {mediaCount} {Type} DVD disk və {copyTime} saat lazımdır.");
+        return copyTime;
+    }
+
+    public override double FreeMemory()
+    {
+        return GetStorageSize();
+    }
+
+    public override void PrintDeviceInfo()
+    {
+        Console.WriteLine($"Media: DVD, Model: {Model}, Oxuma/Yazma Sürəti: {ReadWriteSpeed}, Tip: {Type}");
+    }
+}
+
+class HDD : Storage
+{
+    public double USB2Speed { get; set; }
+    public double TotalSize { get; set; }
+
+    public override double GetStorageSize()
+    {
+        return TotalSize;
+    }
+
+    public override double Copy(double fileSize)
+    {
+        double copyTime = fileSize / USB2Speed;
+
+        Console.WriteLine($"Kopyalama üçün {copyTime} saat lazımdır.");
+        return copyTime;
+    }
+
+    public override double FreeMemory()
+    {
+        return TotalSize;
+    }
+
+    public override void PrintDeviceInfo()
+    {
+        Console.WriteLine($"Media: HDD, Model: {Model}, USB 2.0 Sürəti: {USB2Speed}, Ümumi Ölçüsü: {TotalSize} GB");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Storage flashDrive = new Flash
+        {
+            MediaName = "Kingston",
+            Model = "DT100G3",
+            USB3Speed = 150,
+            Memory = 32
+        };
+
+        Storage dvdDisk = new DVD
+        {
+            MediaName = "Sony",
+            Model = "DVD-R",
+            ReadWriteSpeed = 20,
+            Type = "Single-sided"
+        };
+
+        Storage hddDrive = new HDD
+        {
+            MediaName = "Seagate",
+            Model = "Expansion",
+            USB2Speed = 60,
+            TotalSize = 1000
+        };
+
+        double fileSizeToCopy = 565 * 1024;
+        Console.WriteLine($"Köçürmə zamanı: {flashDrive.Copy(fileSizeToCopy)} saat");
+        Console.WriteLine($"Qalan boş yer: {flashDrive.FreeMemory()} GB");
+        flashDrive.PrintDeviceInfo();
+
+        Console.WriteLine();
+
+        Console.WriteLine($"Köçürmə zamanı: {dvdDisk.Copy(fileSizeToCopy)} saat");
+        Console.WriteLine($"Qalan boş yer: {dvdDisk.FreeMemory()} GB");
+        dvdDisk.PrintDeviceInfo();
+
+        Console.WriteLine();
+
+        Console.WriteLine($"Köçürmə zamanı: {hddDrive.Copy(fileSizeToCopy)} saat");
+        Console.WriteLine($"Qalan boş yer: {hddDrive.FreeMemory()} GB");
+        hddDrive.PrintDeviceInfo();
+    }
+}
